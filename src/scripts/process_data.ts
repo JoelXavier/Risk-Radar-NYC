@@ -337,7 +337,7 @@ function processData() {
 
     // Generate Centroids for Heatmap
     // Simple average of coordinates for the "Point"
-    const pointFeatures = features.map(f => {
+    const pointFeatures = features.map((f: any) => {
         const polyCoords = f.geometry.coordinates[0][0]; // Outer ring
         let sumX = 0, sumY = 0;
         polyCoords.forEach((c: number[]) => { sumX += c[0]; sumY += c[1]; });
