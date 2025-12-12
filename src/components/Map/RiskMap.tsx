@@ -349,7 +349,7 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
                     <Source id="buildings-source" type="geojson" data={data}>
                         <Layer
                             {...riskLayer}
-                            filter={getFilterExpression()}
+                            filter={getFilterExpression() as any}
                         />
                         {/* Hover Layer needs same filter to match visibility? */}
                         {hoverInfo && (
@@ -357,8 +357,8 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
                                 {...highlightLayer}
                                 filter={['all',
                                     ['==', 'bin', hoverInfo.feature.properties.bin],
-                                    getFilterExpression() // Ensure we don't highlight hidden buildings
-                                ]}
+                                    getFilterExpression() as any // Ensure we don't highlight hidden buildings
+                                ] as any}
                             />
                         )}
                     </Source>
