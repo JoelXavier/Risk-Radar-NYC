@@ -206,7 +206,7 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
                 scale: 1.5, // Slightly lower scale to reduce file size
                 useCORS: true,
                 backgroundColor: '#ffffff'
-            });
+            } as any);
 
             // Use JPEG for better compression
             const imgData = canvas.toDataURL('image/jpeg', 0.8);
