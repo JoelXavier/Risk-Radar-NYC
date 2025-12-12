@@ -1,0 +1,49 @@
+.filterContainer {
+    padding: 1rem;
+    background: rgba(2, 6, 23, 0.3);
+    /* Integrated look */
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 0.75rem;
+    width: 100%;
+    /* Fill container */
+    margin-top: 1rem;
+    /* Space from search bar */
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    color: #94a3b8;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    color: #cbd5e1;
+}
+
+.rangeInput {
+    width: 100%;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.rangeLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.625rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}

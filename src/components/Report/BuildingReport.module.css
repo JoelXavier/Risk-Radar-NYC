@@ -1,0 +1,152 @@
+.reportContainer {
+    width: 210mm;
+    /* A4 Width */
+    min-height: 297mm;
+    /* A4 Height */
+    padding: 40px;
+    background-color: #ffffff;
+    color: #0f172a;
+    font-family: 'Inter', sans-serif;
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    /* Hidden from view but renderable */
+    z-index: -100;
+}
+
+.header {
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.brand {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+}
+
+.reportDate {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.section {
+    margin-bottom: 30px;
+}
+
+.sectionTitle {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+}
+
+.mainAddress {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    line-height: 1.1;
+}
+
+.subAddress {
+    font-size: 18px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.statBox {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.statLabel {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.statValue {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.riskScoreSection {
+    background: #0f172a;
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.riskLabel {
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.riskValue {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.table th {
+    text-align: left;
+    color: #64748b;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+}
+
+.sourceTag {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+}

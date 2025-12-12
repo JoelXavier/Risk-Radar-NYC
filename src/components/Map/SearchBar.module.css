@@ -1,0 +1,116 @@
+.searchContainer {
+    position: relative;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 0.5rem;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    background: rgba(15, 23, 42, 0.95);
+}
+
+.searchIcon {
+    color: #94a3b8;
+    margin-right: 0.5rem;
+}
+
+.searchInput {
+    background: transparent;
+    border: none;
+    color: #f1f5f9;
+    width: 100%;
+    outline: none;
+    font-size: 0.875rem;
+}
+
+.searchInput::placeholder {
+    color: #64748b;
+}
+
+.clearBtn {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clearBtn:hover {
+    color: #f1f5f9;
+}
+
+.resultsDropdown {
+    margin-top: 0.5rem;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    max-height: 15rem;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.resultItem {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+    transition: background 0.2s;
+}
+
+.resultItem:last-child {
+    border-bottom: none;
+}
+
+.resultItem:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.resultIcon {
+    color: #3b82f6;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.resultText {
+    display: flex;
+    flex-direction: column;
+}
+
+.resultLabel {
+    font-size: 0.8rem;
+    color: #e2e8f0;
+}
