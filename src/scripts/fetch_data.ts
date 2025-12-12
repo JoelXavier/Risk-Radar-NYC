@@ -26,7 +26,7 @@ async function fetchData() {
         console.log("Fetching HPD Violations...");
         // Filter for Manhattan (1), Bronx (2), Brooklyn (3)
         // Order by novissueddate DESC to get the most recent ones first
-        const hpdRes = await fetch(`${API_ENDPOINTS.HPD_VIOLATIONS}?$limit=15000&$where=boroid IN ('1', '2', '3') AND currentstatus != 'VIOLATION CLOSED'&$order=novissueddate DESC`);
+        const hpdRes = await fetch(`${API_ENDPOINTS.HPD_VIOLATIONS}?$limit=20000&$where=boroid IN ('1', '2', '3', '4') AND currentstatus != 'VIOLATION CLOSED'&$order=novissueddate DESC`);
         const hpdData = await hpdRes.json();
         console.log(`Fetched ${Array.isArray(hpdData) ? hpdData.length : 0} HPD Violations.`);
 
@@ -39,19 +39,24 @@ async function fetchData() {
         const dobBronxData = await dobBronx.json();
 
         console.log("Fetching DOB Violations (Brooklyn)...");
-        const dobBrooklyn = await fetch(`${API_ENDPOINTS.DOB_VIOLATIONS}?$limit=6000&$where=boro = '3' AND violation_category IS NOT NULL AND bin != '0000000'&$order=issue_date DESC`);
+        const dobBrooklyn = await fetch(`${API_ENDPOINTS.DOB_VIOLATIONS}?$limit=8000&$where=boro = '3' AND violation_category IS NOT NULL AND bin != '0000000'&$order=issue_date DESC`);
         const dobBrooklynData = await dobBrooklyn.json();
+
+        console.log("Fetching DOB Violations (Queens)...");
+        const dobQueens = await fetch(`${API_ENDPOINTS.DOB_VIOLATIONS}?$limit=5000&$where=boro = '4' AND violation_category IS NOT NULL AND bin != '0000000'&$order=issue_date DESC`);
+        const dobQueensData = await dobQueens.json();
 
         const allDobData = [
             ...(Array.isArray(dobManhattanData) ? dobManhattanData : []),
             ...(Array.isArray(dobBronxData) ? dobBronxData : []),
-            ...(Array.isArray(dobBrooklynData) ? dobBrooklynData : [])
+            ...(Array.isArray(dobBrooklynData) ? dobBrooklynData : []),
+            ...(Array.isArray(dobQueensData) ? dobQueensData : [])
         ];
         console.log(`Fetched Total ${allDobData.length} DOB Violations.`);
 
         // 2.5 Fetch 311 Service Requests
         console.log("Fetching 311 Service Requests...");
-        const threeOneOneRes = await fetch(`${API_ENDPOINTS.THREE_ONE_ONE}?$limit=15000&$where=borough IN ('MANHATTAN', 'BRONX', 'BROOKLYN') AND created_date > '2023-01-01T00:00:00.000' AND complaint_type IN ('HEAT/HOT WATER', 'PAINT/PLASTER', 'PLUMBING', 'UNSANITARY CONDITION', 'WATER LEAK')`);
+        const threeOneOneRes = await fetch(`${API_ENDPOINTS.THREE_ONE_ONE}?$limit=20000&$where=borough IN ('MANHATTAN', 'BRONX', 'BROOKLYN', 'QUEENS') AND created_date > '2023-01-01T00:00:00.000' AND complaint_type IN ('HEAT/HOT WATER', 'PAINT/PLASTER', 'PLUMBING', 'UNSANITARY CONDITION', 'WATER LEAK')`);
         const threeOneOneData = await threeOneOneRes.json();
         console.log(`Fetched ${Array.isArray(threeOneOneData) ? threeOneOneData.length : 0} 311 Complaints.`);
 
@@ -73,13 +78,14 @@ async function fetchData() {
         if (uniqueBinsFromDob.length > 0) {
             console.log("Fetching Building Footprints...");
 
-            // Aim for balanced distribution across 3 boroughs
-            const manhattanBins = uniqueBinsFromDob.filter(b => b.startsWith('1')).slice(0, 2000);
-            const bronxBins = uniqueBinsFromDob.filter(b => b.startsWith('2')).slice(0, 4500);
-            const brooklynBins = uniqueBinsFromDob.filter(b => b.startsWith('3')).slice(0, 2000);
+            // Aim for balanced distribution across 4 boroughs
+            const manhattanBins = uniqueBinsFromDob.filter(b => b.startsWith('1')).slice(0, 4000);
+            const bronxBins = uniqueBinsFromDob.filter(b => b.startsWith('2')).slice(0, 6500);
+            const brooklynBins = uniqueBinsFromDob.filter(b => b.startsWith('3')).slice(0, 3500);
+            const queensBins = uniqueBinsFromDob.filter(b => b.startsWith('4')).slice(0, 1500);
 
-            const targetBins = [...manhattanBins, ...bronxBins, ...brooklynBins];
-            console.log(`Fetching footprints for ${targetBins.length} buildings (${manhattanBins.length} MN, ${bronxBins.length} BX, ${brooklynBins.length} BK)...`);
+            const targetBins = [...manhattanBins, ...bronxBins, ...brooklynBins, ...queensBins];
+            console.log(`Fetching footprints for ${targetBins.length} buildings (${manhattanBins.length} MN, ${bronxBins.length} BX, ${brooklynBins.length} BK, ${queensBins.length} QN)...`);
 
             const chunkSize = 100;
             // Process in parallel chunks to speed up? Na. Single threaded promises for now is safer.
@@ -197,7 +203,7 @@ async function fetchData() {
         console.log("Fetching Eviction Data...");
         let evictions: any[] = [];
         try {
-            const evictionsRes = await fetch(`${API_ENDPOINTS.EVICTIONS}?$limit=5000&$where=executed_date > '2023-01-01T00:00:00.000' AND residential_commercial_ind = 'Residential' AND borough IN ('MANHATTAN', 'BRONX', 'BROOKLYN')`);
+            const evictionsRes = await fetch(`${API_ENDPOINTS.EVICTIONS}?$limit=8000&$where=executed_date > '2023-01-01T00:00:00.000' AND residential_commercial_ind = 'Residential' AND borough IN ('MANHATTAN', 'BRONX', 'BROOKLYN', 'QUEENS')`);
             const evData = await evictionsRes.json();
             if (Array.isArray(evData)) {
                 evictions = evData;
