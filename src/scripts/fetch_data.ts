@@ -8,7 +8,8 @@ const API_ENDPOINTS = {
     THREE_ONE_ONE: "https://data.cityofnewyork.us/resource/erm2-nwe9.json",
     MAP_PLUTO: "https://data.cityofnewyork.us/resource/64uk-42ks.json",
     HPD_REGS: "https://data.cityofnewyork.us/resource/tesw-yqqr.json",
-    HPD_CONTACTS: "https://data.cityofnewyork.us/resource/feu5-w2e2.json"
+    HPD_CONTACTS: "https://data.cityofnewyork.us/resource/feu5-w2e2.json",
+    EVICTIONS: "https://data.cityofnewyork.us/resource/6z8x-wfk4.json"
 };
 
 const OUTPUT_DIR = path.join(process.cwd(), 'public/data');
@@ -192,6 +193,20 @@ async function fetchData() {
             }
         }
 
+        // 6. Fetch Residential Evictions (2023-Present)
+        console.log("Fetching Eviction Data...");
+        let evictions: any[] = [];
+        try {
+            const evictionsRes = await fetch(`${API_ENDPOINTS.EVICTIONS}?$limit=5000&$where=executed_date > '2023-01-01T00:00:00.000' AND residential_commercial_ind = 'Residential' AND borough IN ('MANHATTAN', 'BRONX', 'BROOKLYN')`);
+            const evData = await evictionsRes.json();
+            if (Array.isArray(evData)) {
+                evictions = evData;
+                console.log(`Fetched ${evictions.length} Evictions.`);
+            }
+        } catch (e) {
+            console.error("Error fetching evictions:", e);
+        }
+
         const output = {
             dob_violations: allDobData,
             hpd_violations: Array.isArray(hpdData) ? hpdData : [],
@@ -200,6 +215,7 @@ async function fetchData() {
             pluto_data: plutoData,
             hpd_registrations: hpdRegistrations,
             hpd_contacts: hpdContacts,
+            evictions: evictions,
             generated_at: new Date().toISOString()
         };
 

@@ -18,6 +18,7 @@ import { point } from '@turf/helpers';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { BuildingReport } from '../Report/BuildingReport';
+import { AboutModal } from '../UI/AboutModal';
 
 // Initial Viewport: NYC Data Center
 const INITIAL_VIEW_STATE = {
@@ -115,6 +116,7 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
     const [pointsData, setPointsData] = useState<any>(null); // For Heatmap
     const [selectedBuilding, setSelectedBuilding] = useState<any>(null);
     const [minRiskFilter, setMinRiskFilter] = useState(0);
+    const [showAbout, setShowAbout] = useState(false);
     // Use ref to access map instance for flyTo
     const mapRef = useRef<MapRef>(null);
 
@@ -389,6 +391,40 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
             )}
 
             {/* Decorative Overlays (Glassmorphism) */}
+
+            {/* About Button (Top Center) */}
+            <button
+                onClick={() => setShowAbout(true)}
+                style={{
+                    position: 'absolute',
+                    top: '24px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 45,
+                    background: 'rgba(15, 23, 42, 0.8)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '20px',
+                    padding: '8px 16px',
+                    color: '#93c5fd', // Light blue text
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(15, 23, 42, 0.95)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(15, 23, 42, 0.8)'}
+            >
+                <HelpCircle size={14} />
+                About The Project
+            </button>
+
+            {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+
             <div className={`${styles.overlayPanel} ${selectedBuilding ? styles.expanded : ''}`}>
                 <div className={styles.dragHandle} />
 
@@ -464,6 +500,15 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
                                     {selectedBuilding.construct_year > 0 ? selectedBuilding.construct_year : 'N/A'}
                                 </span>
                             </div>
+                            <div className={styles.detailItem}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span className={styles.detailLabel}>Zip Code</span>
+                                    <InfoTooltip label="Postal code" />
+                                </div>
+                                <span className={styles.detailValue}>
+                                    {selectedBuilding.zipcode || 'N/A'}
+                                </span>
+                            </div>
                         </div>
 
                         <div className={styles.scoreContainer}>
@@ -528,8 +573,76 @@ export default function RiskMap({ onBuildingSelect }: RiskMapProps) {
                                     </div>
                                     <span className={styles.detailValue}>{selectedBuilding.complaint_311_count}</span>
                                 </div>
+                                <div className={styles.detailItem}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <span className={styles.detailLabel} style={{ color: (selectedBuilding.eviction_count > 0) ? '#f87171' : undefined }}>Evictions</span>
+                                        <InfoTooltip label="Executed residential evictions (since 2023). Source: NYC Marshals." />
+                                    </div>
+                                    <span className={styles.detailValue} style={{ color: (selectedBuilding.eviction_count > 0) ? '#f87171' : undefined }}>
+                                        {selectedBuilding.eviction_count || 0}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Resident Feedback Cloud (NLP Topics) */}
+                        {(() => {
+                            let topics = selectedBuilding.complaint_topics;
+                            // Parse if it's a string (GeoJSON sometimes serializes objects)
+                            if (typeof topics === 'string') {
+                                try { topics = JSON.parse(topics); } catch (e) { topics = []; }
+                            }
+
+                            if (Array.isArray(topics) && topics.length > 0) {
+                                return (
+                                    <div style={{ marginTop: '24px' }}>
+                                        <div className={styles.detailsTitle} style={{ marginBottom: '12px' }}>
+                                            Resident Feedback <InfoTooltip label="Common keywords from tenant 311 complaints" />
+                                        </div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            {topics.map((t: any, i: number) => {
+                                                // Severity Color Logic
+                                                const severe = ["MOLD", "MICE", "ROACHES", "NO HEAT", "LEAD", "VERMIN"];
+                                                const moderate = ["LEAK", "WATER", "PAINT", "PLUMBING", "SEWAGE", "UNSANITARY"];
+
+                                                let bgColor = 'rgba(148, 163, 184, 0.2)'; // Default Grey
+                                                let textColor = '#cbd5e1';
+                                                let borderColor = 'rgba(148, 163, 184, 0.3)';
+
+                                                if (severe.includes(t.topic)) {
+                                                    bgColor = 'rgba(239, 68, 68, 0.2)'; // Red
+                                                    textColor = '#fca5a5';
+                                                    borderColor = 'rgba(239, 68, 68, 0.4)';
+                                                } else if (moderate.includes(t.topic)) {
+                                                    bgColor = 'rgba(234, 179, 8, 0.2)'; // Yellow/Orange
+                                                    textColor = '#fde047';
+                                                    borderColor = 'rgba(234, 179, 8, 0.4)';
+                                                }
+
+                                                return (
+                                                    <div key={i} style={{
+                                                        padding: '4px 8px',
+                                                        borderRadius: '6px',
+                                                        backgroundColor: bgColor,
+                                                        border: `1px solid ${borderColor}`,
+                                                        color: textColor,
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px'
+                                                    }}>
+                                                        <span>{t.topic}</span>
+                                                        <span style={{ opacity: 0.7, fontSize: '0.7rem' }}>({t.count})</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
 
                         {(() => {
                             let violations = selectedBuilding.recent_violations;

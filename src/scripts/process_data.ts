@@ -85,7 +85,7 @@ function processData() {
     }
 
     const rawData: RawData = JSON.parse(fs.readFileSync(INPUT_FILE, 'utf-8'));
-    const { dob_violations = [], hpd_violations = [], three_one_one = [], footprints = [], pluto_data = [], hpd_registrations = [], hpd_contacts = [] } = rawData as any;
+    const { dob_violations = [], hpd_violations = [], three_one_one = [], footprints = [], pluto_data = [], hpd_registrations = [], hpd_contacts = [], evictions = [] } = rawData as any;
 
     const features = footprints.map((building: any) => {
         const bin = building.bin;
@@ -148,6 +148,14 @@ function processData() {
             return c.bbl && c.bbl === bbl;
         });
 
+        // Match Evictions (by BBL or BIN)
+        // Eviction data keys: "bbl", "bin"
+        const buildingEvictions = evictions.filter((e: any) => {
+            if (e.bbl && e.bbl === bbl) return true;
+            if (e.bin && e.bin === bin) return true;
+            return false;
+        });
+
         // Calculate Age
         const yearBuilt = parseInt(building.cnstrct_yr || "0");
         const currentYear = new Date().getFullYear();
@@ -194,6 +202,18 @@ function processData() {
             }
         }
 
+        // Fallback for Zip Code (DOB then 311)
+        if (!zipcode && buildingDobViolations.length > 0) {
+            // DOB violations often have 'zip' field
+            const withZip = buildingDobViolations.find((v: any) => v.zip);
+            if (withZip) zipcode = withZip.zip;
+        }
+        if (!zipcode && building311Complaints.length > 0) {
+            // 311 usually has 'incident_zip'
+            const withZip = building311Complaints.find((c: any) => c.incident_zip);
+            if (withZip) zipcode = withZip.incident_zip;
+        }
+
         // Fallback for borough from DOB violations if checking boro field
         if (!borough && buildingDobViolations.length > 0) {
             const boroMap: any = { '1': 'New York', '2': 'Bronx', '3': 'Brooklyn', '4': 'Queens', '5': 'Staten Island' };
@@ -221,7 +241,7 @@ function processData() {
                 description: v.novdescription ? v.novdescription.replace(/§\s*[\d-]+(\s*ADM CODE)?(\s*HMC)?[:]\s*/i, '').trim() : "Violation"
             }));
 
-        // 3. 311 Complaints
+        // 3. 311 Complaints & Sentiment Analysis (NLP Lite)
         const recent311 = building311Complaints
             .sort((a: any, b: any) => (b.created_date || "").localeCompare(a.created_date || ""))
             .slice(0, 3)
@@ -230,6 +250,38 @@ function processData() {
                 date: c.created_date ? c.created_date.split('T')[0] : "N/A",
                 description: `${c.complaint_type}: ${c.descriptor}`
             }));
+
+        // NLP Lite: Extract Complaint Topics
+        // Frequencies of keywords in 311 data
+        const topicCounts: { [key: string]: number } = {};
+        building311Complaints.forEach((c: any) => {
+            // Focus on Complaint Type (e.g., "HEAT/HOT WATER", "UNSANITARY CONDITION")
+            // and Descriptor (e.g., "MICE", "MOLD", "LEAD")
+            const text = `${c.complaint_type} ${c.descriptor || ''}`.toUpperCase();
+
+            // Define Keywords of Interest (Severity Mapping)
+            const keywords = [
+                "MOLD", "MICE", "ROACHES", "BED BUGS", "VERMIN",
+                "NO HEAT", "NO HOT WATER", "LEAD", "PAINT",
+                "LEAK", "WATER", "PLUMBING", "SEWAGE",
+                "ELECTRIC", "WIRING", "NO LIGHTING",
+                "DOOR", "LOCK", "WINDOW",
+                "GARBAGE", "DIRTY", "UNSANITARY",
+                "NOISE", "CONSTRUCTION"
+            ];
+
+            keywords.forEach(word => {
+                if (text.includes(word)) {
+                    topicCounts[word] = (topicCounts[word] || 0) + 1;
+                }
+            });
+        });
+
+        // Convert to Array and Sort by Frequency
+        const complaintTopics = Object.entries(topicCounts)
+            .sort((a, b) => b[1] - a[1]) // Descending count
+            .slice(0, 5) // Top 5
+            .map(([topic, count]) => ({ topic, count }));
 
         // Filter HPD Violations (1 year) - This seems to be a re-filtering or a new set of HPD violations
         // The instruction implies this is part of a new scoring logic, but the existing `buildingHpdViolations`
@@ -324,7 +376,9 @@ function processData() {
                 hpd_class_b: hpdB,
                 hpd_class_c: hpdC,
                 hpd_class_i: hpdI,
-                recent_violations: allRecentViolations
+                recent_violations: allRecentViolations,
+                complaint_topics: complaintTopics,
+                eviction_count: buildingEvictions.length
             },
             geometry: building.the_geom
         };

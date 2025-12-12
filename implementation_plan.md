@@ -82,6 +82,20 @@ The backend logic will be a set of extraction and processing scripts to generate
 3.  [ ] **New Feature**: "Report Card" Export (Download PDF/Image).
 4.  [ ] SEO Meta tags.
 
+### Phase 6: Advanced Intelligence Features (Roadmap)
+1.  [ ] **Tenant Complaints Analysis (NLP)**:
+    *   **Problem**: Raw "HEAT/HOT WATER" categories lack emotional weight and specific detail.
+    *   **Solution**: Extract keywords ("mold", "leaks", "vermin") from descriptors. Visualize complaint topics (Word Cloud).
+    *   **Data**: 311 `descriptor` field.
+2.  [ ] **Landlord Portfolio Viewer**:
+    *   **Problem**: Bad actors hide behind LLCs. A single building view misses the pattern.
+    *   **Solution**: Group by `OwnerName` (matches in PLUTO/HPD). Show "Risk Portfolio" stats (e.g., "This owner has 12 other High Risk buildings").
+    *   **Data**: Cross-reference loaded datasets by Owner Name.
+3.  [ ] **Eviction Awareness**:
+    *   **Problem**: High violation counts often precede displacement.
+    *   **Solution**: Overlay Eviction Marshal data. Add "Eviction Risk" badge if evictions > 0 in last year.
+    *   **Data**: NYC Open Data (Evictions).
+
 ## 6. Questions/Prerequisites
 - **Mapbox Token**: Do you have a Mapbox public key? (I can use a free placeholder or fallback to Leaflet if strictly necessary, but Mapbox is better for this).
 - **Data Scope**: Fetching *all* NYC buildings is heavy (1M+ rows). We will start with a specific borough or neighborhood (e.g., Lower Manhattan) for the prototype.
